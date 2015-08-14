@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <inttypes.h>
+
+
+typedef 
+int(*add_f)(int, int);           // func pointer
+
+void     *handle = NULL;
+uint32_t *symbol_addr = NULL;
+int      result   = 0; 
+
+int main() {
+
+    handle = dl_open("demolib.so", 0);
+    if(NULL == handle){
+        exit(EXIT_FAILURE);
+    }
+
+    /* find the global variable "g_sum" */
+    symbol_addr = dl_sym(handle,"g_sum");
+    if(NULL == symbol_addr) {
+        printf("not found symbol!\n");
+        exit(EXIT_FAILURE);
+    }
+    printf( "<g_sum> symbol_addr: 0x%08x  ->  %d\n\n", symbol_addr, *(uint32_t*)symbol_addr);
+    
+    /* find a func named "g_add" */
+    symbol_addr = dl_sym(handle,"g_add");
+    if(NULL == symbol_addr) {
+        printf("not found symbol!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    result = ((add_f)symbol_addr)(100, 200);
+    
+    printf("<g_add> result = %d\n\n", result);
+
+
+    /* find the global variable "g_sum" */
+    symbol_addr = dl_sym(handle,"g_sum");
+    if(NULL == symbol_addr) {
+        printf("not found symbol!\n");
+        exit(EXIT_FAILURE);
+    }
+    printf( "<g_sum> symbol_addr: 0x%08x  ->  %d\n\n", symbol_addr, *(uint32_t*)symbol_addr);
+
+    dl_close(handle);
+
+    return 0;
+}
+
